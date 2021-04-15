@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use scopeguard::defer;
 
-use libbpf_rs::{MapFlags, Object, ObjectBuilder};
+use libbpf_rs::{Iter, MapFlags, Object, ObjectBuilder};
 
 fn get_test_object_path(filename: &str) -> PathBuf {
     let mut path = PathBuf::new();
@@ -536,4 +536,34 @@ fn test_object_ringbuf_closure() {
 
     assert_eq!(v1, 1);
     assert_eq!(v2, 2);
+}
+
+#[test]
+fn test_task_iter() {
+    bump_rlimit_mlock();
+    let mut obj = get_test_object("taskiter.bpf.o");
+    let prog = obj
+        .prog("dump_pid")
+        .expect("error finding program")
+        .expect("failed to find program");
+    let link = prog.attach().expect("failed to attach prog");
+    let iter = Iter::new(link);
+
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    struct IndexPidPair {
+        i: u32,
+        pid: i32,
+    }
+
+    let items = unsafe {
+        iter.read::<IndexPidPair, 8>()
+            .expect("Failed to read from iterator")
+    };
+
+    assert!(!items.is_empty());
+    assert!(items[0].i == 0);
+    assert!(items.windows(2).all(|w| w[0].i + 1 == w[1].i));
+    // Check for init
+    assert!(items.iter().any(|&item| item.pid == 1));
 }
