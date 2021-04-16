@@ -51,6 +51,8 @@ fn bump_rlimit_mlock() {
 
 #[test]
 fn test_object_build_and_load() {
+    bump_rlimit_mlock();
+
     get_test_object("runqslower.bpf.o");
 }
 
@@ -78,6 +80,8 @@ fn test_object_name() {
 
 #[test]
 fn test_object_maps() {
+    bump_rlimit_mlock();
+
     let mut obj = get_test_object("runqslower.bpf.o");
     obj.map("start")
         .expect("error finding map")
