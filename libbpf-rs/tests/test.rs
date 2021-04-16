@@ -549,7 +549,7 @@ fn test_object_ringbuf_closure() {
 }
 
 #[test]
-fn test_task_iter() {
+fn test_object_task_iter() {
     bump_rlimit_mlock();
 
     let mut obj = get_test_object("taskiter.bpf.o");
