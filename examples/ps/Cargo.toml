@@ -1,0 +1,10 @@
+[package]
+name = "ps"
+version = "0.1.0"
+authors = ["Brian Chen <brianchen118@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+anyhow = "1.0"
+libbpf-rs = { path = "../../libbpf-rs" }
+libc = "0.2"

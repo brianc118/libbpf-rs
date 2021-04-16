@@ -355,6 +355,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ps"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "libbpf-rs",
+ "libc",
+]
+
+[[package]]
 name = "query"
 version = "0.1.0"
 dependencies = [

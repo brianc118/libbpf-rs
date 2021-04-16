@@ -6,7 +6,10 @@ use std::sync::mpsc::channel;
 use std::time::Duration;
 
 use nix::errno;
+<<<<<<< HEAD
 use plain::Plain;
+=======
+>>>>>>> e873073 (Use assert_eq)
 use scopeguard::defer;
 
 use libbpf_rs::{Iter, MapFlags, Object, ObjectBuilder};
@@ -43,12 +46,16 @@ fn bump_rlimit_mlock() {
     };
 
     let ret = unsafe { libc::setrlimit(libc::RLIMIT_MEMLOCK, &rlimit) };
+<<<<<<< HEAD
     assert_eq!(
         ret,
         0,
         "Setting RLIMIT_MEMLOCK failed with errno: {}",
         errno::errno()
     );
+=======
+    assert_eq!(ret, 0, "setrlimit() failed with errno: {}", errno::errno());
+>>>>>>> e873073 (Use assert_eq)
 }
 
 #[test]
