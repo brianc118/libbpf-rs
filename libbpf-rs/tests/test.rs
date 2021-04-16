@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 use std::sync::mpsc::channel;
 use std::time::Duration;
 
+use nix::errno;
 use scopeguard::defer;
 
 use libbpf_rs::{Iter, MapFlags, Object, ObjectBuilder};
@@ -40,7 +41,12 @@ fn bump_rlimit_mlock() {
     };
 
     let ret = unsafe { libc::setrlimit(libc::RLIMIT_MEMLOCK, &rlimit) };
-    assert!(ret == 0);
+    assert_eq!(
+        ret,
+        0,
+        "Setting RLIMIT_MEMLOCK failed with errno: {}",
+        errno::errno()
+    );
 }
 
 #[test]
@@ -541,6 +547,7 @@ fn test_object_ringbuf_closure() {
 #[test]
 fn test_task_iter() {
     bump_rlimit_mlock();
+
     let mut obj = get_test_object("taskiter.bpf.o");
     let prog = obj
         .prog("dump_pid")
@@ -562,7 +569,7 @@ fn test_task_iter() {
     };
 
     assert!(!items.is_empty());
-    assert!(items[0].i == 0);
+    assert_eq!(items[0].i, 0);
     assert!(items.windows(2).all(|w| w[0].i + 1 == w[1].i));
     // Check for init
     assert!(items.iter().any(|&item| item.pid == 1));
