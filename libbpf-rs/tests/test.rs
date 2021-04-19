@@ -1,10 +1,12 @@
 use std::collections::HashSet;
 use std::fs;
+use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::sync::mpsc::channel;
 use std::time::Duration;
 
 use nix::errno;
+use plain::Plain;
 use scopeguard::defer;
 
 use libbpf_rs::{Iter, MapFlags, Object, ObjectBuilder};
@@ -555,9 +557,9 @@ fn test_object_task_iter() {
     let mut obj = get_test_object("taskiter.bpf.o");
     let prog = obj
         .prog("dump_pid")
-        .expect("error finding program")
-        .expect("failed to find program");
-    let link = prog.attach().expect("failed to attach prog");
+        .expect("Error finding program")
+        .expect("Failed to find program");
+    let link = prog.attach().expect("Failed to attach prog");
     let iter = Iter::new(link);
 
     #[repr(C)]
@@ -567,10 +569,19 @@ fn test_object_task_iter() {
         pid: i32,
     }
 
-    let items = unsafe {
-        iter.read::<IndexPidPair, 8>()
-            .expect("Failed to read from iterator")
-    };
+    unsafe impl Plain for IndexPidPair {}
+
+    let mut buf = Vec::new();
+    let bytes_read = iter
+        .open()
+        .expect("Failed to open iterator")
+        .read_to_end(&mut buf)
+        .expect("Failed to read from iterator");
+
+    assert!(bytes_read > 0);
+    assert_eq!(bytes_read % std::mem::size_of::<IndexPidPair>(), 0);
+    let items: &[IndexPidPair] =
+        plain::slice_from_bytes(buf.as_slice()).expect("Input slice cannot satisfy length");
 
     assert!(!items.is_empty());
     assert_eq!(items[0].i, 0);

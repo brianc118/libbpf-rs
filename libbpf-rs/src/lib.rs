@@ -81,7 +81,7 @@ mod util;
 pub use libbpf_sys;
 
 pub use crate::error::{Error, Result};
-pub use crate::iter::Iter;
+pub use crate::iter::{Iter, OpenIter};
 pub use crate::link::Link;
 pub use crate::map::{Map, MapFlags, MapType, OpenMap};
 pub use crate::object::{Object, ObjectBuilder, OpenObject};

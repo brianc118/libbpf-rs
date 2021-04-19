@@ -6,9 +6,9 @@
 struct index_pid_pair {
   uint32_t i;
   pid_t pid;
-}
+};
 
-uint32_t i = 0;
+static uint32_t i = 0;
 
 SEC("iter/task")
 int dump_pid(struct bpf_iter__task *ctx)
